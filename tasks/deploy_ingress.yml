@@ -1,0 +1,49 @@
+---
+- name: Download helm installation script
+  get_url:
+    url: "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+    dest: /home/kubernetes/get_helm-3
+    owner: kubernetes
+    group: kubernetes
+    mode: 0774
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Launch helm installation script
+  ansible.builtin.shell: "/home/kubernetes/get_helm-3"
+  vars:
+    ansible_become: false
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Add nginx helm repo
+  ansible.builtin.shell: "helm repo add nginx-stable https://helm.nginx.com/stable"
+  vars:
+    ansible_become: false
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Update helm repo
+  ansible.builtin.shell: "helm repo update"
+  vars:
+    ansible_become: false
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Deploy ingress controller
+  ansible.builtin.command: |
+    helm install nginx-ingress nginx-stable/nginx-ingress \
+    --set rbac.create=true \
+    -n "{{ ingress_controller_namespace }}" \
+    --create-namespace
+  vars:
+    ansible_become: false
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Customize ingress controller ports
+  ansible.builtin.command: |
+    kubectl patch svc nginx-ingress-controller -p '{"spec": {"ports": [{"port": 443,"targetPort": 443,"name": "https","nodePort": {{ ingress_controller_https_nodeport }} },{"port": 80,"targetPort": 80,"name": "http","nodePort": {{ ingress_controller_http_nodeport }} }],"type": "LoadBalancer"}}' -n {{ ingress_controller_namespace }}
+  when: inventory_hostname in groups['control-plane-primary']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to all pods running."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=30

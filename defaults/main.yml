@@ -1,0 +1,29 @@
+---
+# defaults file for kubernetes.deployment
+
+system_packages:
+  - yum-utils
+  - tree
+  - vim
+  - git
+  - wget
+
+# Packages Vars
+docker_packages: 
+  - docker-ce 
+  - docker-ce-cli 
+  - containerd.io 
+  - docker-compose-plugin
+
+docker_svc:
+  - docker
+
+kubernetes_packages:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+kubelet_svc:
+  - kubelet
+
+temp_dir: "/tmp/rook"

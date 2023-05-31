@@ -1,0 +1,25 @@
+---
+- name: Enabling Kubernetes repository
+  ansible.builtin.yum_repository:
+    name: Kubernetes
+    description: "Kubernetes Repository"
+    file: kubernetes
+    baseurl: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+
+- name: Ensure kubernetes deployment packages are installed
+  ansible.builtin.dnf:
+    name: "{{ kubernetes_packages }}"
+    state: latest
+
+- name: Ensure kubelet service is enabled and started
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ kubelet_svc }}"
+
+- name: Ensure swap is disabled
+  ansible.builtin.command: "swapoff -a"

@@ -1,0 +1,41 @@
+---
+# tasks file for kubernetes.deployment
+
+# BASIC CONFIGURATION -----------------------------
+
+- name: Customize remote hosts
+  import_tasks: customize_hosts.yml
+
+- name: Configure Docker environment
+  import_tasks: docker_configuration.yml
+
+- name: Configure Kubernetes environment
+  import_tasks: kubernetes_configuration.yml
+
+- name: Init Kubernetes Control-Plane node
+  import_tasks: init_control_plane_node.yml
+
+- name: Join Kubernetes Control-Plane nodes
+  import_tasks: join_control_plane_nodes.yml
+  when: deploy_cluster_control_plane|bool == True
+
+- name: Deploy kubernetes network pods
+  import_tasks: deploy_networking.yml
+
+- name: Deploy kubernetes Compute nodes
+  import_tasks: join_compute_nodes.yml
+
+# # CUSTOM CONFIGURATION -----------------------------
+
+- name: Deploy Ingress Controller
+  import_tasks: deploy_ingress.yml
+  when: deploy_ingress|bool == True
+
+- name: Deploy Ceph Storage
+  import_tasks: deploy_storage.yml
+  when: deploy_storage|bool == True
+
+# RESUME CLUSTER DEPLOYMENT -----------------------------
+
+- name: Show deployment status
+  import_tasks: show_resume_deployment.yml

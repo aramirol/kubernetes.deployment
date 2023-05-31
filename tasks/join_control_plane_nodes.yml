@@ -1,0 +1,57 @@
+---
+- name: Get create cluster stdout
+  ansible.builtin.shell: grep -B2 "control-plane --certificate-key" kubeadm_init.log | sed 's/\\//g' | sed ':a;N;$!ba;s/\n/ /g' | sed -e 's/ \+/ /g' | sed 's/^ //'
+  register: kubeadmjoin
+  delegate_to: "{{ primary_cp_node }}"
+
+- name: kubeadm join control-plane-2-3
+  ansible.builtin.shell: "{{kubeadmjoin.stdout_lines[0]}} > kubeadm_join.log"
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Get create cluster stdout
+  ansible.builtin.shell: "tail -n 16 kubeadm_join.log | head -7"
+  register: join
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Show join configuration
+  ansible.builtin.debug:
+    var: join.stdout_lines
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Create kubernetes config file directory
+  ansible.builtin.file:
+    path: "/home/kubernetes/.kube"
+    state: directory
+    owner: kubernetes
+    group: kubernetes
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Copy config file to .kube directory
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/kubernetes/.kube/config
+    owner: kubernetes
+    group: kubernetes
+    remote_src: true
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Create root config file directory
+  ansible.builtin.file:
+    path: "/root/.kube"
+    state: directory
+    owner: root
+    group: root
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Copy config file to root .kube directory
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    remote_src: true
+  when: inventory_hostname in groups['control-plane-secondary']
+
+- name: Export KUBECONFIG var
+  ansible.builtin.shell: "export KUBECONFIG=$HOME/.kube/config"
+  when: inventory_hostname in groups['control-plane-secondary']

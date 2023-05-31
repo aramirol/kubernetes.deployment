@@ -1,0 +1,26 @@
+---
+- name: Get create cluster stdout
+  ansible.builtin.shell: grep -m 1 -B1 "discovery-token-ca-cert-hash" kubeadm_init.log | sed 's/\\//g' | sed ':a;N;$!ba;s/\n/ /g' | sed -e 's/ \+/ /g' | sed 's/^ //' | sed 's/--control-plane//g'
+  register: kubeadmjoin
+  delegate_to: "{{ primary_cp_node }}"
+
+- name: Kubeadm join workers
+  ansible.builtin.shell: "{{ kubeadmjoin.stdout_lines[0] }} > kubeadm_join.log"
+  when: inventory_hostname in groups['compute-nodes']
+
+- name: Get create cluster stdout
+  ansible.builtin.shell: "tail -n 6 kubeadm_join.log | head -3"
+  register: kubeadmjoinlog
+  when: inventory_hostname in groups['compute-nodes']
+
+- name: Show kubeadm join stdout
+  ansible.builtin.debug:
+    msg: "{{ kubeadmjoinlog.stdout_lines }}"
+  when: inventory_hostname in groups['compute-nodes']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to all pods running."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=90

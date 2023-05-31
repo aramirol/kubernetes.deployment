@@ -1,0 +1,100 @@
+---
+- name: Create temporal folder /tmp/rook/
+  ansible.builtin.file:
+    path: "{{ temp_dir }}"
+    state: directory
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Copy rook files to target node
+  ansible.builtin.template:
+    src: "{{ item }}.yaml.j2"
+    dest: "{{ temp_dir }}/{{ item }}.yaml"
+    mode: '0644'
+  loop:
+    - "crds"
+    - "common"
+    - "operator"
+    - "cluster"
+    - "toolbox"
+    - "filesystem"
+    - "storageclassfs"
+    - "storageclassrbd"
+    - "ingress"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook crds
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/crds.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook common
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/common.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook operator
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/operator.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to Operator."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=30
+
+- name: Create rook cluster
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/cluster.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to all pods running."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=180
+
+- name: Deploy rook toolbox pod
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/toolbox.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to toolbox pod running."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=20
+
+- name: Check storage status
+  ansible.builtin.command: "kubectl -n rook-ceph exec -it deploy/rook-ceph-tools ceph status"
+  register: cephstatus
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Show init configuration
+  ansible.builtin.debug:
+    var: cephstatus.stdout_lines
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Check storage status
+  ansible.builtin.command: "kubectl -n rook-ceph exec -it deploy/rook-ceph-tools ceph osd status"
+  register: cephosdstatus
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Show init configuration
+  ansible.builtin.debug:
+    var: cephosdstatus.stdout_lines
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook filesystem
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/filesystem.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook storageclass fs
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/storageclassfs.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook storageclass rbd
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/storageclassrbd.yaml"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create rook ingress
+  ansible.builtin.command: "kubectl apply -f {{ temp_dir }}/ingress.yaml"
+  when: inventory_hostname in groups['control-plane-primary']

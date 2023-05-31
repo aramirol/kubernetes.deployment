@@ -1,0 +1,5 @@
+---
+- scm: git
+  src: https://github.com/aramirol/kubernetes.deployment.git
+  version: v1.0.0
+  name: kubernetes.deployment

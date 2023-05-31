@@ -1,0 +1,11 @@
+---
+- name: Deploy Calico kubernetes networking
+  ansible.builtin.command: "kubectl apply -f {{ networking_url }}"
+  when: inventory_hostname in groups['control-plane-primary']
+
+- ansible.builtin.debug:
+    msg:
+    - "Waiting to all pods running."
+  when: inventory_hostname in groups['control-plane-primary']
+
+- pause: seconds=60

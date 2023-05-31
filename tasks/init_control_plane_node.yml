@@ -1,0 +1,56 @@
+---
+- name: Init kubernetes Control-Plane as single node
+  ansible.builtin.shell: "kubeadm init > kubeadm_init.log"
+  when: inventory_hostname in groups['control-plane-primary'] and deploy_cluster_control_plane|bool == False
+
+- name: Init kubernetes Control-Plane as cluster
+  ansible.builtin.shell: "kubeadm init --control-plane-endpoint {{ lb_name }}:{{ lb_port }} --upload-certs > kubeadm_init.log"
+  when: inventory_hostname in groups['control-plane-primary'] and deploy_cluster_control_plane|bool == True
+
+- name: Get create cluster stdout
+  ansible.builtin.shell: cat kubeadm_init.log
+  register: init
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Show init configuration
+  ansible.builtin.debug:
+    var: init.stdout_lines
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create kubernetes config file directory
+  ansible.builtin.file:
+    path: "/home/kubernetes/.kube"
+    state: directory
+    owner: kubernetes
+    group: kubernetes
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Copy config file to .kube directory
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/kubernetes/.kube/config
+    owner: kubernetes
+    group: kubernetes
+    remote_src: true
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Create root config file directory
+  ansible.builtin.file:
+    path: "/root/.kube"
+    state: directory
+    owner: root
+    group: root
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Copy config file to root .kube directory
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    remote_src: true
+  when: inventory_hostname in groups['control-plane-primary']
+
+- name: Export KUBECONFIG var
+  ansible.builtin.shell: "export KUBECONFIG=$HOME/.kube/config"
+  when: inventory_hostname in groups['control-plane-primary']
