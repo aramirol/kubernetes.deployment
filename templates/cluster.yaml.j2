@@ -46,16 +46,16 @@ spec:
   mon:
     # Set the number of mons to be started. Generally recommended to be 3.
     # For highest availability, an odd number of mons should be specified.
-    count: {{ mon_count }}
+    count: {{ ceph_mon_count }}
     # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
     # Mons should only be allowed on the same node for test environments where data loss is acceptable.
-    allowMultiplePerNode: {{ allow_multiple_per_node }}
+    allowMultiplePerNode: {{ ceph_allow_multiple_per_node }}
   mgr:
     # When higher availability of the mgr is needed, increase the count to 2.
     # In that case, one mgr will be active and one in standby. When Ceph updates which
     # mgr is active, Rook will update the mgr services to match the active mgr.
-    count: {{ mgr_count }}
-    allowMultiplePerNode: {{ allow_multiple_per_node }}
+    count: {{ ceph_mgr_count }}
+    allowMultiplePerNode: {{ ceph_allow_multiple_per_node }}
     modules:
       # Several modules should not need to be included in this list. The "dashboard" and "monitoring" modules
       # are already enabled by other settings in the cluster CR.
@@ -69,7 +69,7 @@ spec:
     # serve the dashboard at the given port.
     # port: 8443
     # serve the dashboard using SSL
-    ssl: {{ ssl_dashboard }}
+    ssl: {{ ceph_ssl_dashboard }}
   # enable prometheus alerting for cluster
   monitoring:
     # requires Prometheus to be pre-installed

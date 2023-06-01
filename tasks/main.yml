@@ -25,7 +25,7 @@
 - name: Deploy kubernetes Compute nodes
   import_tasks: join_compute_nodes.yml
 
-# # CUSTOM CONFIGURATION -----------------------------
+# CUSTOM CONFIGURATION -----------------------------
 
 - name: Deploy Ingress Controller
   import_tasks: deploy_ingress.yml

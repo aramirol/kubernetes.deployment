@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ ingress_name }}
+  name: {{ ceph_ingress_name }}
   namespace: rook-ceph
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: {{ ingress_host }}
+  - host: {{ ceph_ingress_host }}
     http:
       paths:
       - pathType: Prefix
@@ -19,4 +19,4 @@ spec:
           service:
             name: rook-ceph-mgr-dashboard
             port:
-              number: {{ service_port }}
+              number: {{ ceph_service_port }}

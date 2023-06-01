@@ -1,56 +1,53 @@
 ---
 # vars file for kubernetes.deployment
 
-# Custom deployment vars
+##############################################################
+# KUBERNETES VARS
+##############################################################
+
 # Name of the remote primary host dedicated to Control-Plane node
 primary_cp_node: "k8s-control-plane-0.casare.int"
 
 # If True, the role will deploy more than one control-plane node
 deploy_cluster_control_plane: False
 
-# Load Balancer name and port to deploy kubernetes with more than one node (control-plane or worker)
 lb_name: "lb.casare.int"
 lb_ip: "192.168.1.126"
 lb_port: "6443"
 
-# DNS server
 dns_name: "dns-server.casare.int"
 dns_ip: "192.168.1.101"
 
-# Kubernetes network deployment
 networking_url: "https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml"
 
+##############################################################
+# INGRESS VARS
+##############################################################
 # If True, the role will deploy the NGINX Ingress Controller
 deploy_ingress: True
+
 ingress_controller_namespace: "nginx-ingress-controller"
 ingress_controller_http_nodeport: "30080"
 ingress_controller_https_nodeport: "30443"
 
+##############################################################
+# STORAGE VARS
+##############################################################
+
 # If True, the role will deploy Rook Ceph Storage
 deploy_storage: True
 
-# Vars to customize crds.yaml template
-metadata_max_servers: "1" # Default: 10
-metadata_min_servers: "1" # Default: 1
-
-# Vars to customize operator.yaml template
-csi_provisioner_replicas: "1" # Default: 2
-
-# Vars to customize cluster.yaml template
-mon_count: "1" # Default: 3
-mgr_count: "1" # Default: 2
-allow_multiple_per_node: "false" # Default: false
-ssl_dashboard: "false" # Default: "true". If true, service port will be 8443. If false, service port will be 7000.
-
-# Vars to customize filesystem.yaml template
-cephfs_name: k8sfs # Default: myfs
-metadata_pool_replicated_size: "1" # Default: 3
-data_pool_replicated_size: "1" # Default: 3
-require_safe_replica_size: "false" # Default: true
-
-# Vars to customize storageclassfs.yaml template
-
-# Vars to customize ingress.yaml template
-ingress_name: ceph-ingress
-ingress_host: ceph.casare.int
-service_port: "7000" # Default: 8443. Check the variable 'ssl_dashboard' to specify the correct port
+ceph_metadata_max_servers: "1" # Default: 10
+ceph_metadata_min_servers: "1" # Default: 1
+ceph_csi_provisioner_replicas: "1" # Default: 2
+ceph_mon_count: "1" # Default: 3
+ceph_mgr_count: "1" # Default: 2
+ceph_allow_multiple_per_node: "false" # Default: false
+ceph_ssl_dashboard: "false" # Default: "true". If true, service port will be 8443. If false, service port will be 7000.
+ceph_cephfs_name: k8sfs # Default: myfs
+ceph_metadata_pool_replicated_size: "1" # Default: 3
+ceph_data_pool_replicated_size: "1" # Default: 3
+ceph_require_safe_replica_size: "false" # Default: true
+ceph_ingress_name: ceph-ingress
+ceph_ingress_host: ceph.casare.int
+ceph_service_port: "7000" # Default: 8443. Check the variable 'ssl_dashboard' to specify the correct port

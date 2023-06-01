@@ -63,7 +63,7 @@ data:
   # CSI_SIDECAR_LOG_LEVEL: "0"
 
   # Set replicas for csi provisioner deployment.
-  CSI_PROVISIONER_REPLICAS: "{{ csi_provisioner_replicas }}"
+  CSI_PROVISIONER_REPLICAS: "{{ ceph_csi_provisioner_replicas }}"
 
   # OMAP generator will generate the omap mapping between the PV name and the RBD image.
   # CSI_ENABLE_OMAP_GENERATOR need to be enabled when we are using rbd mirroring feature.

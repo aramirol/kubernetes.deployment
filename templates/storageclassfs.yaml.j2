@@ -10,11 +10,11 @@ parameters:
   clusterID: rook-ceph # namespace:cluster
 
   # CephFS filesystem name into which the volume shall be created
-  fsName: {{ cephfs_name }}
+  fsName: {{ ceph_cephfs_name }}
 
   # Ceph pool into which the volume shall be created
   # Required for provisionVolume: "true"
-  pool: {{ cephfs_name }}-replicated
+  pool: {{ ceph_cephfs_name }}-replicated
 
   # The secrets contain Ceph admin credentials. These are generated automatically by the operator
   # in the same namespace as the cluster.

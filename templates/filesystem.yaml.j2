@@ -8,14 +8,14 @@
 apiVersion: ceph.rook.io/v1
 kind: CephFilesystem
 metadata:
-  name: {{ cephfs_name }}
+  name: {{ ceph_cephfs_name }}
   namespace: rook-ceph # namespace:cluster
 spec:
   # The metadata pool spec. Must use replication.
   metadataPool:
     replicated:
-      size: {{ metadata_pool_replicated_size }}
-      requireSafeReplicaSize: {{ require_safe_replica_size }}
+      size: {{ ceph_metadata_pool_replicated_size }}
+      requireSafeReplicaSize: {{ ceph_require_safe_replica_size }}
     parameters:
       # Inline compression mode for the data pool
       # Further reference: https://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#inline-compression
@@ -29,10 +29,10 @@ spec:
     - name: replicated
       failureDomain: host
       replicated:
-        size: {{ data_pool_replicated_size }}
+        size: {{ ceph_data_pool_replicated_size }}
         # Disallow setting pool with replica 1, this could lead to data loss without recovery.
         # Make sure you're *ABSOLUTELY CERTAIN* that is what you want
-        requireSafeReplicaSize: {{ require_safe_replica_size }}
+        requireSafeReplicaSize: {{ ceph_require_safe_replica_size }}
       parameters:
         # Inline compression mode for the data pool
         # Further reference: https://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#inline-compression
